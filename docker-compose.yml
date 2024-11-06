@@ -1,0 +1,36 @@
+services:
+  db-kertaskerja:
+    image: mysql:8.0.39
+    environment:
+      - MYSQL_ROOT_PASSWORD=$db_password
+      - MYSQL_DATABASE=$db_database
+    ports:
+      - "33063:3306"
+    volumes:
+      - kertaskerja-db-volume:/var/lib/mysql
+    restart: on-failure
+
+  backend:
+    image: ghcr.io/bappeda-dev-team/kertas-kerja-backend:latest
+    environment:
+      - DB_URL=$be_db_url
+      - host=$be_host
+      - port=$be_port
+    depends_on:
+      - db-kertaskerja
+    ports:
+      - "8083:8080"
+    restart: unless-stopped
+
+  frontend:
+    image: ghcr.io/bappeda-dev-team/kertas-kerja-frontend:latest
+    environment:
+      - NEXT_PUBLIC_API_URL=$fe_api_url
+    depends_on:
+      - backend
+    ports:
+      - "3003:3000"
+    restart: unless-stopped
+
+volumes:
+  kertaskerja-db-volume: {}
